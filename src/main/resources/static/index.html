@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - buffergeometry - lines</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #cccccc;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+
+				background-color: #FFFFFF;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+			a {
+				color: #0080ff;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+		<div id="info">OSM WebGL Renderer</div>
+		<script src="js/three.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script>
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			var container, stats, ws;
+			var camera, scene, renderer, controls;
+			var mesh;
+			var geometry = new THREE.BufferGeometry();
+			var material = new THREE.LineBasicMaterial({ color: 0x010101, linewidth: 0.001 });
+			init();
+			animate();
+			function processArrayBuffer(data) {
+			    var arr = new Uint8Array(data);
+			    data = data.slice(1);
+				if (arr[0] == 0) {
+					var positions = new Float32Array(data);
+					geometry.addAttribute('position', new THREE.BufferAttribute(positions, 2));
+				} else if (arr[0] == 1) {
+					var indices = new Uint32Array(data);
+					geometry.addAttribute('index', new THREE.BufferAttribute(indices, 1));
+					mesh = new THREE.LineSegments(geometry, material);
+					scene.add(mesh);
+				}
+			}
+			function init() {
+				container = document.getElementById( 'container' );
+				//lat-lon
+				//camera = new THREE.OrthographicCamera(9.566431, 10.469895, 53.690376, 53.422318, -10, +10);
+				//gk
+				camera = new THREE.OrthographicCamera(3537490, 3597790, 5951160, 5922180, -10, +10);
+				scene = new THREE.Scene();
+				
+				var loc = window.location, new_uri;
+				if (loc.protocol === "https:") {
+				    new_uri = "wss:";
+				} else {
+				    new_uri = "ws:";
+				}
+				new_uri += "//" + loc.host;
+				new_uri += loc.pathname + "ws";
+				var support = "MozWebSocket" in window ? 'MozWebSocket' : ("WebSocket" in window ? 'WebSocket' : null);
+				if (support == null) {
+				    alert("Your browser doesn't support Websockets.");
+				    return;
+				}
+				ws = new window[support](new_uri);
+				ws.binaryType = "arraybuffer";
+				ws.onmessage = function(msg) {
+					if (msg.data instanceof ArrayBuffer) {
+						processArrayBuffer(msg.data);
+					}
+				}
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setClearColor( 0xffffff, 1);
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.target.set( 0, 0, 0 ); // view direction perpendicular to XY-plane
+				controls.noRotate = true;
+				controls.noZoom = false; // optional
+				controls.mouseButtons = { PAN: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, ORBIT: THREE.MOUSE.RIGHT }; // swapping left and right buttons
+
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+				stats.update();
+			}
+			function render() {
+				renderer.render(scene, camera);
+			}
+		</script>
+	</body>
+</html>
