@@ -17,6 +17,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.7</java.version>
 	</properties>
+	<repositories>
+		<!--other repositories if any -->
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -39,20 +47,25 @@
 		</dependency>
 		<dependency>
 			<groupId>hbt</groupId>
+			<artifactId>hbt-coordinats</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>hbt</groupId>
 			<artifactId>hbt-coordinates</artifactId>
 			<version>2.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hbt</groupId>
-			<artifactId>geofox-server-intf</artifactId>
+			<groupId>hbt</groupId>
+			<artifactId>g3server</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hbt</groupId>
+			<groupId>hbt</groupId>
 			<artifactId>hbt-util</artifactId>
-			<version>1.0.0</version>
+			<version>0.0.3</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
